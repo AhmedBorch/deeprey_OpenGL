@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include "MyGLCanvas.h"
 #include <GL/gl.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -24,7 +25,11 @@ MyGLCanvas::MyGLCanvas(wxWindow* parent)
     m_buttonPressed(false),
     m_showControls(false),
     m_rotationAngle(0.0f)
-    {}
+    {    
+        Bind(wxEVT_PAINT, &MyGLCanvas::OnPaint, this);
+        // initial refresh
+        Refresh();
+    }
 
 
 MyGLCanvas::~MyGLCanvas() {
@@ -92,6 +97,7 @@ void MyGLCanvas::LoadTexture() {
 }
 void MyGLCanvas::RenderButton() {
     if (!m_texture) return;
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Enable textures and blending
     glEnable(GL_TEXTURE_2D);
@@ -148,6 +154,10 @@ void MyGLCanvas::RenderButton() {
     }
 
 
+
+    // For UI elements that should appear on top:
+    // glDisable(GL_DEPTH_TEST);
+
     // Draw textured quad
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex2f(glX1, glY2);
@@ -155,6 +165,7 @@ void MyGLCanvas::RenderButton() {
         glTexCoord2f(1.0f, 1.0f); glVertex2f(glX2, glY1);
         glTexCoord2f(0.0f, 1.0f); glVertex2f(glX1, glY1);
     glEnd();
+    // glEnable(GL_DEPTH_TEST);
 
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
@@ -183,13 +194,9 @@ void MyGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
+    // Render the button
+    RenderButton();
 
-    // Draw triagle
-    glBegin(GL_TRIANGLES);
-        glColor3f(1, 0, 0); glVertex2f(-0.5f, -0.5f);
-        glColor3f(0, 1, 0); glVertex2f(0.5f, -0.5f);
-        glColor3f(0, 0, 1); glVertex2f(0.0f, 0.5f);
-    glEnd();
 
     // Draw a colored quad
     glBegin(GL_QUADS);
@@ -198,9 +205,14 @@ void MyGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     glColor3f(0, 0, 1); glVertex2f(0.2f, 0.2f);
     glColor3f(0, 1, 0); glVertex2f(0.2f, -0.2f);
     glEnd();
+    
+    // Draw triagle
+    glBegin(GL_TRIANGLES);
+        glColor3f(1, 0, 0); glVertex2f(-0.5f, -0.5f);
+        glColor3f(0, 1, 0); glVertex2f(0.5f, -0.5f);
+        glColor3f(0, 0, 1); glVertex2f(0.0f, 0.5f);
+    glEnd();
 
-    // Render the button
-    RenderButton();
 
     glFlush();
     SwapBuffers();
@@ -213,6 +225,13 @@ void MyGLCanvas::OnSize(wxSizeEvent& event) {
 }
 
 void MyGLCanvas::InitGL() {
+    // Initialize GLEW (if you haven't)
+    glewExperimental = GL_TRUE;
+    glewInit();
+    
+    // Set up depth buffer
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     SetCurrent(*m_context);
     
     // Basic OpenGL initialization
