@@ -1,0 +1,3 @@
+/home/ahmed/Desktop/own_work/deeprey/build/CMakeFiles/wxGL_deeprey.dir
+/home/ahmed/Desktop/own_work/deeprey/build/CMakeFiles/edit_cache.dir
+/home/ahmed/Desktop/own_work/deeprey/build/CMakeFiles/rebuild_cache.dir
